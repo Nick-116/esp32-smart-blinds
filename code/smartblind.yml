@@ -19,22 +19,19 @@ logger:
 
 # Enable Home Assistant API
 api:
-  services:
-    - service: control_servo
-      variables:
-        level: float
-      then:
-        - servo.write:
-            id: my_servo
-            level: !lambda 'return level / 100.0;'
 
 ota:
 
 sensor:
   - platform: adc
     pin: A0
-    name: "Living Room Brightness"
+    id: pot_position
     update_interval: 0.005s
+    filters:
+      - calibrate_linear:
+          - 0.2 -> 0.0
+          - 0.8 -> 1.0
+      - lambda: return clamp(x, 0, 1);
     
 output:
   - platform: esp8266_pwm
@@ -51,21 +48,19 @@ servo:
 cover:
   - platform: template
     name: "Template Cover"
-    lambda: |-
-      if (id(top_end_stop).state) {
-        return COVER_OPEN;
-      } else {
-        return COVER_CLOSED;
-      }
+    lambda: return id(pot_position);
+    has_position: true
     open_action:
-        - servo.write:
-      id: my_servo
-      level: -100.0%
+      - servo.write:
+          id: my_servo
+          level: -100.0%
     close_action:
-        - servo.write:
-      id: my_servo
-      level: 100.0%
+      - servo.write:
+          id: my_servo
+          level: 37.0%
     stop_action:
       - servo.detach: my_servo
-    optimistic: true
-
+    position_action:
+      - servo.write:
+          id: my_servo
+          level: !lambda return -1.37 * pos + 0.37;
