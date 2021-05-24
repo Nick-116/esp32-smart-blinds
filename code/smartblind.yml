@@ -1,39 +1,71 @@
-sensor: 
-- platform: adc 
-pin: A0 
-name: "Living Room Brightness" 
-update_interval: 0.005s 
- 
-output: 
-- platform: esp8266_pwm 
-id: pwm_output 
-pin: D1 
-frequency: 50 Hz 
- 
- 
-servo: 
-- id: my_servo 
-output: pwm_output 
-transition_length: 2s 
- 
-cover: 
-- platform: template 
-name: "Template Cover" 
-lambda: |- 
-if (id(top_end_stop).state) { 
-return COVER_OPEN; 
-} else { 
-return COVER_CLOSED; 
-} 
-open_action: 
-- servo.write: 
-id: my_servo 
-level: -100.0% 
-close_action: 
-- servo.write: 
-id: my_servo 
-level: 100.0% 
-stop_action: 
-- servo.detach: my_servo 
-optimistic: true 
- 
+esphome:
+  name: esp01
+  platform: ESP8266
+  board: nodemcuv2
+
+wifi:
+  ssid: "ssid"
+  password: "password"
+
+  # Enable fallback hotspot (captive portal) in case wifi connection fails
+  ap:
+    ssid: "ssid"
+    password: "password"
+
+captive_portal:
+
+# Enable logging
+logger:
+
+# Enable Home Assistant API
+api:
+  services:
+    - service: control_servo
+      variables:
+        level: float
+      then:
+        - servo.write:
+            id: my_servo
+            level: !lambda 'return level / 100.0;'
+
+ota:
+
+sensor:
+  - platform: adc
+    pin: A0
+    name: "Living Room Brightness"
+    update_interval: 0.005s
+    
+output:
+  - platform: esp8266_pwm
+    id: pwm_output
+    pin: D1
+    frequency: 50 Hz
+    
+    
+servo:
+  - id: my_servo
+    output: pwm_output
+    transition_length: 2s
+    
+cover:
+  - platform: template
+    name: "Template Cover"
+    lambda: |-
+      if (id(top_end_stop).state) {
+        return COVER_OPEN;
+      } else {
+        return COVER_CLOSED;
+      }
+    open_action:
+        - servo.write:
+      id: my_servo
+      level: -100.0%
+    close_action:
+        - servo.write:
+      id: my_servo
+      level: 100.0%
+    stop_action:
+      - servo.detach: my_servo
+    optimistic: true
+
