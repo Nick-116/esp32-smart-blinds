@@ -4,68 +4,85 @@ esphome:
   board: nodemcuv2
 
 wifi:
-  ssid: "ssid"
+  ssid: "Wifi"
   password: "password"
 
   # Enable fallback hotspot (captive portal) in case wifi connection fails
   ap:
-    ssid: "ssid"
-    password: "password"
+    ssid: "backup"
+    password: "backuppassword"
 
 captive_portal:
 
 # Enable logging
 logger:
 
-# Enable Home Assistant API
-api:
-  services:
-    - service: control_servo
-      variables:
-        level: float
-      then:
-        - servo.write:
-            id: my_servo
-            level: !lambda 'return level / 100.0;'
-
 ota:
 
 sensor:
   - platform: adc
     pin: A0
-    name: "Living Room Brightness"
-    update_interval: 0.005s
+    id: pot_position
+    update_interval: 1s
+    filters:
+      - calibrate_linear:
+          - 0.2 -> 0.0
+          - 0.8 -> 1.0
+      - lambda: return clamp(x, 0, 1);
+  - platform: template
+    name: "My Blind Position"
+    id: position
     
-output:
-  - platform: esp8266_pwm
-    id: pwm_output
-    pin: D1
-    frequency: 50 Hz
-    
-    
-servo:
-  - id: my_servo
-    output: pwm_output
-    transition_length: 2s
-    
+api:
+  services:
+    - service: control_blind
+      variables:
+        target: int
+      then:
+        - stepper.set_target:
+            id: my_stepper
+            target: !lambda 'return target;'
+        - sensor.template.publish:
+            id: position
+            state: !lambda 'return target;'
+
 cover:
   - platform: template
-    name: "Template Cover"
-    lambda: |-
-      if (id(top_end_stop).state) {
-        return COVER_OPEN;
-      } else {
-        return COVER_CLOSED;
-      }
+    name: "My Blind"
+    id: my_blind
+    device_class: blind
     open_action:
-        - servo.write:
-      id: my_servo
-      level: -100.0%
+      - stepper.set_target:
+          id: my_stepper
+          target: 6000
+      - sensor.template.publish:
+          id: position
+          state: !lambda return id(my_stepper).target_position;
     close_action:
-        - servo.write:
-      id: my_servo
-      level: 100.0%
+      - stepper.set_target:
+          id: my_stepper
+          target: 0
+      - sensor.template.publish:
+            id: position
+            state: !lambda return id(my_stepper).target_position;
     stop_action:
-      - servo.detach: my_servo
+      - stepper.set_target:
+          id: my_stepper
+          target: !lambda return id(my_stepper).current_position;
+      - sensor.template.publish:
+            id: position
+            state: !lambda return id(my_stepper).current_position;
     optimistic: true
+    assumed_state: true
 
+
+stepper:
+  - platform: a4988
+    id: my_stepper
+    step_pin: D1
+    dir_pin: D2
+    max_speed: 700
+
+    # Optional:
+    acceleration: inf
+    deceleration: inf
