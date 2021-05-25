@@ -14,15 +14,16 @@ sensor:
   - platform: adc
     pin: A0
     id: pot_position
-    update_interval: 1s
+    update_interval: 100ms
     filters:
       - calibrate_linear:
-          - 0.2 -> 0.0
-          - 0.8 -> 1.0
+          - 0.8 -> 0.0
+          - 0.2 -> 1.0
       - lambda: return clamp(x, 0, 1);
   - platform: template
-    name: "My Blind Position"
+    name: "My Stepper Position"
     id: position
+    lambda: return id(my_stepper).current_position;
     
 api:
   services:
@@ -42,29 +43,23 @@ cover:
     name: "My Blind"
     id: my_blind
     device_class: blind
+    lambda: return id(pot_position).state;
     open_action:
       - stepper.set_target:
           id: my_stepper
           target: 6000
-      - sensor.template.publish:
-          id: position
-          state: !lambda return id(my_stepper).target_position;
     close_action:
       - stepper.set_target:
           id: my_stepper
           target: 0
-      - sensor.template.publish:
-            id: position
-            state: !lambda return id(my_stepper).target_position;
     stop_action:
       - stepper.set_target:
           id: my_stepper
           target: !lambda return id(my_stepper).current_position;
-      - sensor.template.publish:
-            id: position
-            state: !lambda return id(my_stepper).current_position;
-    optimistic: true
-    assumed_state: true
+    position_action:
+      - stepper.set_target:
+          id: my_stepper
+          target: !lambda pos * 6000;
 
 
 stepper:
