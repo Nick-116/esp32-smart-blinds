@@ -3,15 +3,6 @@ esphome:
   platform: ESP8266
   board: nodemcuv2
 
-wifi:
-  ssid: "Wifi"
-  password: "password"
-
-  # Enable fallback hotspot (captive portal) in case wifi connection fails
-  ap:
-    ssid: "backup"
-    password: "backuppassword"
-
 captive_portal:
 
 # Enable logging
