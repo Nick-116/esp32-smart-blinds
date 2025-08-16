@@ -10,21 +10,17 @@ Altogether this project costs around $20 per blind but depending on the motor yo
 
 
 ## Features
-ESPHome Integration – fully compatible with Home Assistant and ESPHome for seamless automation, scheduling, and remote control.
-Accurate Angle Measurement – uses a magnetic encoder (AS5600) to continuously track the real position of the slats in 0–360° resolution.
+- ESPHome Integration – fully compatible with Home Assistant and ESPHome for seamless automation, scheduling, and remote control.
+- Accurate Angle Measurement – uses a magnetic encoder (AS5600) to continuously track the real position of the slats in 0–360° resolution.
 Human-Safe Design – blinds can still be moved by hand, and the system updates itself with the new position in real time instead of fighting the user.
 Smooth Motor Control – a DRV8871 motor driver controls a 12 V DC motor, providing reliable torque while keeping noise low.
 Compact PCB – custom 50×30 mm board integrates ESP32-C3, motor driver, power regulation, and expansion GPIO for extra buttons or sensors.
 Dual Power Input – supports 12 V operation for daily use, with USB-C available for firmware flashing and debugging.
 Status & Debug Outputs – onboard LED indicators, plus live telemetry (angle, magnitude, and magnet status) exposed via ESPHome sensors.
 
-🚀 How It Works
-	1.	The ESP32 runs ESPHome, connecting the blind to Home Assistant or any MQTT-based system.
+How It Works
+	1.	The ESP32 runs ESPHome, connecting the blind to Home Assistant.
 	2.	A magnetic encoder precisely measures shaft position, so the software always knows the blind angle.
-	3.	When a control command is given (e.g., “open blinds 50%”), the motor driver turns the motor until the target angle is reached.
+	3.	When a control command is given (e.g., “open blinds 50%”), the DC motor driver turns the motor until the target angle is reached.
 	4.	If someone physically moves the blinds, the encoder detects it, updates the system state, and prevents damage by not forcing the motor.
 
-🛠️ Use Cases
-	•	Integrate blinds into smart home automations (e.g., open at sunrise, close when it gets hot).
-	•	Maintain exact blind angles for energy efficiency and comfort.
-	•	Allow hybrid control (manual or automated) without conflict.
