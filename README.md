@@ -8,8 +8,7 @@ An ESP32-powered controller for 2-inch slat blinds. The system provides automate
 All of the products in this category cant lift a blind that heavy, and cant be moved manually without screwing them up. I designed this to fix both of those problems (and to save me $180 a blind lol).
 
 ## Cost
-Altogether this project costs around $20 per blind but depending on the motor you use and where you get it from, it can be much cheaper. I use a nema 17 1:5 geared stepper motor, which works well for my medium sized blinds, and will work good in most cases. This costs around $10 on aliexpress. If you have lighter blinds you can get a normal nema 17 stepper, which costs around $5 on aliexpress, or $10 on amazon.
-
+I built each of my blind controllers for around $25 each, including PCB assembly by JLCPCB. I did buy them in groups of 10 though.
 
 ## Features
 - ESPHome Integration – fully compatible with Home Assistant and ESPHome for seamless automation, scheduling, and remote control.
